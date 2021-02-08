@@ -6,9 +6,37 @@ from common.http import is_true
 from common.struct import Stack
 from common.db.models import output_as_string
 
-from .models import Node
+from .models import Node, Asset
 
 logger = get_logger(__file__)
+
+
+def check_node_assets_amount():
+    nodes = list(Node.objects.all().only('id', 'key', 'assets_amount'))
+    nodeid_assetid_pairs = list(Asset.nodes.through.objects.all().values_list('node_id', 'asset_id'))
+
+    nodekey_assetids_mapper = defaultdict(set)
+    nodeid_nodekey_mapper = {}
+    for node in nodes:
+        nodeid_nodekey_mapper[node.id] = node.key
+
+    for nodeid, assetid in nodeid_assetid_pairs:
+        if nodeid not in nodeid_nodekey_mapper:
+            continue
+        nodekey = nodeid_nodekey_mapper[nodeid]
+        nodekey_assetids_mapper[nodekey].add(assetid)
+
+    util = NodeAssetsUtil(nodes, nodekey_assetids_mapper)
+    util.generate()
+
+    to_updates = []
+    for node in nodes:
+        assets_amount = util.get_assets_amount(node.key)
+        if node.assets_amount != assets_amount:
+            logger.error(f'Node[{node.key}] assets amount error {node.assets_amount} != {assets_amount}')
+            node.assets_amount = assets_amount
+            to_updates.append(node)
+    Node.objects.bulk_update(to_updates, fields=('assets_amount',))
 
 
 def is_query_node_all_assets(request):
@@ -104,5 +132,3 @@ class NodeAssetsUtil:
         util = cls(nodes, mapping)
         util.generate()
         return util
-
-
