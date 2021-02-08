@@ -8,10 +8,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.utils.translation import ugettext_lazy as _
 from django.shortcuts import get_object_or_404, Http404
-from django.utils.decorators import method_decorator
 from django.db.models.signals import m2m_changed
 
-from common.const.http import POST
 from common.exceptions import SomeoneIsDoingThis
 from common.const.signals import PRE_REMOVE, POST_REMOVE
 from assets.models import Asset
@@ -19,7 +17,6 @@ from common.utils import get_logger, get_object_or_none
 from common.tree import TreeNodeSerializer
 from orgs.mixins.api import OrgModelViewSet
 from orgs.mixins import generics
-from orgs.utils import current_org
 from ..hands import IsOrgAdmin
 from ..models import Node
 from ..tasks import (
@@ -28,7 +25,6 @@ from ..tasks import (
 )
 from .. import serializers
 from .mixin import SerializeToTreeNodeMixin
-from assets.locks import NodeTreeUpdateLock
 
 
 logger = get_logger(__file__)
