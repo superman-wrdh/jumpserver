@@ -18,7 +18,7 @@ logger = get_logger(__file__)
 
 
 @receiver(m2m_changed, sender=Asset.nodes.through)
-def on_node_asset_change(cls, sender, action, instance, reverse, pk_set, **kwargs):
+def on_node_asset_change(sender, action, instance, reverse, pk_set, **kwargs):
     # 不允许 `pre_clear` ，因为该信号没有 `pk_set`
     # [官网](https://docs.djangoproject.com/en/3.1/ref/signals/#m2m-changed)
     refused = (PRE_CLEAR,)
