@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from assets.pagination import AssetPaginationBase
 from perms.models import UserAssetGrantedTreeNodeRelation
 from common.utils import get_logger
@@ -13,11 +15,13 @@ class NodeGrantedAssetPagination(AssetPaginationBase):
             return node.assets_amount
         else:
             logger.warn(f'Not hit node.assets_amount[{node}] because {self._view} not has `pagination_node` -> {self._request.get_full_path()}')
-            return super().get_count(queryset)
+            return None
 
 
 class AllGrantedAssetPagination(AssetPaginationBase):
     def get_count_from_nodes(self, queryset):
+        if settings.PERM_SINGLE_ASSET_TO_UNGROUP_NODE:
+            return None
         assets_amount = sum(UserAssetGrantedTreeNodeRelation.objects.filter(
             user=self._user, node_parent_key=''
         ).values_list('node_assets_amount', flat=True))

@@ -27,7 +27,10 @@ class AssetPaginationBase(LimitOffsetPagination):
             if k not in exclude_query_params and v is not None:
                 logger.warn(f'Not hit node.assets_amount because find a unknow query_param `{k}` -> {self._request.get_full_path()}')
                 return super().get_count(queryset)
-        return self.get_count_from_nodes(queryset)
+        node_assets_count = self.get_count_from_nodes(queryset)
+        if node_assets_count is None:
+            return super().get_count(queryset)
+        return node_assets_count
 
     def get_count_from_nodes(self, queryset):
         raise NotImplementedError
@@ -42,4 +45,4 @@ class NodeAssetTreePagination(AssetPaginationBase):
                 node = Node.org_root()
             logger.debug(f'Hit node.assets_amount[{node.assets_amount}] -> {self._request.get_full_path()}')
             return node.assets_amount
-        return super().get_count(queryset)
+        return None
