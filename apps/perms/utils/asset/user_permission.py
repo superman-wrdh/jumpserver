@@ -670,7 +670,7 @@ class UserGrantedAssetsQueryUtils(UserGrantedUtilsBase):
         granted_status = node.get_granted_status(self.user)
 
         if granted_status == NodeFrom.granted:
-            assets = Asset.objects.order_by().filter(nodes_id=node.id)
+            assets = Asset.objects.order_by().filter(nodes__id=node.id)
             return assets
         elif granted_status == NodeFrom.asset:
             return self._get_indirect_granted_node_assets(node.id)
@@ -678,7 +678,7 @@ class UserGrantedAssetsQueryUtils(UserGrantedUtilsBase):
             return Asset.objects.none()
 
     def _get_indirect_granted_node_assets(self, id) -> AssetQuerySet:
-        assets = Asset.objects.order_by().filter(nodes_id=id) & self.get_direct_granted_assets()
+        assets = Asset.objects.order_by().filter(nodes__id=id) & self.get_direct_granted_assets()
         return assets
 
     def _get_indirect_granted_node_all_assets(self, node) -> QuerySet:
