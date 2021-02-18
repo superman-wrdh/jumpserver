@@ -1,4 +1,5 @@
 from django.conf import settings
+from rest_framework.request import Request
 
 from assets.pagination import AssetPaginationBase
 from perms.models import UserAssetGrantedTreeNodeRelation
@@ -7,7 +8,13 @@ from common.utils import get_logger
 logger = get_logger(__name__)
 
 
-class NodeGrantedAssetPagination(AssetPaginationBase):
+class GrantedAssetPaginationBase(AssetPaginationBase):
+    def init_attrs(self, queryset, request: Request, view=None):
+        super().init_attrs(queryset, request, view)
+        self._user = view.user
+
+
+class NodeGrantedAssetPagination(GrantedAssetPaginationBase):
     def get_count_from_nodes(self, queryset):
         node = getattr(self._view, 'pagination_node', None)
         if node:
@@ -18,7 +25,7 @@ class NodeGrantedAssetPagination(AssetPaginationBase):
             return None
 
 
-class AllGrantedAssetPagination(AssetPaginationBase):
+class AllGrantedAssetPagination(GrantedAssetPaginationBase):
     def get_count_from_nodes(self, queryset):
         if settings.PERM_SINGLE_ASSET_TO_UNGROUP_NODE:
             return None

@@ -9,10 +9,13 @@ logger = get_logger(__name__)
 
 class AssetPaginationBase(LimitOffsetPagination):
 
-    def paginate_queryset(self, queryset, request: Request, view=None):
+    def init_attrs(self, queryset, request: Request, view=None):
         self._request = request
         self._view = view
         self._user = request.user
+
+    def paginate_queryset(self, queryset, request: Request, view=None):
+        self.init_attrs(queryset, request, view)
         return super().paginate_queryset(queryset, request, view=None)
 
     def get_count(self, queryset):
