@@ -191,5 +191,5 @@ def ensure_in_real_or_default_org(func):
     def wrapper(*args, **kwargs):
         if not current_org or current_org.is_root():
             raise ValueError('You must in a real or default org!')
-        return func()
+        return func(*args, **kwargs)
     return wrapper

@@ -12,7 +12,7 @@ from common.utils import get_logger
 logger = get_logger(__file__)
 
 
-@shared_task()
+@shared_task
 def check_node_assets_amount_task(orgid=None):
     if orgid is None:
         orgs = [*Organization.objects.all(), Organization.default()]
