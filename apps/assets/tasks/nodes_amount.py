@@ -28,6 +28,6 @@ def check_node_assets_amount_task(orgid=None):
 
 
 @register_as_period_task(crontab='0 2 * * *')
-@shared_task(queue='celery_heavy_tasks')
+@shared_task
 def check_node_assets_amount_period_task():
     check_node_assets_amount_task()
