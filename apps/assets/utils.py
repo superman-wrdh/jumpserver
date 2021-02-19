@@ -6,11 +6,13 @@ from common.http import is_true
 from common.struct import Stack
 from common.db.models import output_as_string
 
+from .locks import NodeTreeUpdateLock
 from .models import Node, Asset
 
 logger = get_logger(__file__)
 
 
+@NodeTreeUpdateLock()
 def check_node_assets_amount():
     nodes = list(Node.objects.all().only('id', 'key', 'assets_amount'))
     nodeid_assetid_pairs = list(Asset.nodes.through.objects.all().values_list('node_id', 'asset_id'))

@@ -93,7 +93,7 @@ class DistributedLock(RedisLock):
             if self.locked_by_current_thread():
                 self._acquired_reentrant_lock = True
                 logger.debug(
-                    f'I[{self.id}] acquire reentrant lock[{self.name}], already locked by current thread[{self._thread_id}] [{self.get_owner_id()}].')
+                    f'I[{self.id}] reentry lock[{self.name}] in thread[{self._thread_id}].')
                 return True
 
             logger.debug(f'I[{self.id}] attempt acquire reentrant-lock[{self.name}].')
@@ -126,7 +126,7 @@ class DistributedLock(RedisLock):
     def _release_on_reentrant_locked_by_brother(self):
         if self._acquired_reentrant_lock:
             self._acquired_reentrant_lock = False
-            logger.debug(f'I[{self.id}] release reentrant-lock[{self.name}] locked by brother[{self.get_owner_id()}] in thread[{self._thread_id}] ok')
+            logger.debug(f'I[{self.id}] released reentrant-lock[{self.name}] owner[{self.get_owner_id()}] in thread[{self._thread_id}]')
             return
         else:
             self._raise_exc_with_log(f'Reentrant-lock[{self.name}] is not acquired by me[{self.id}].')
@@ -136,7 +136,7 @@ class DistributedLock(RedisLock):
 
         id = getattr(thread_local, self.name, None)
         if id != self.id:
-            raise PermissionError(f'Reentrant-lock[{self.name}] is not locked by me[{self.id}], owner is {id}, I can not release')
+            raise PermissionError(f'Reentrant-lock[{self.name}] is not locked by me[{self.id}], owner[{id}]')
         try:
             # 这里要保证先删除 thread_local 的标记，
             delattr(thread_local, self.name)
@@ -177,8 +177,7 @@ class DistributedLock(RedisLock):
 
         # 处理是否在事务提交时才释放锁
         if self._release_on_transaction_commit:
-            logger.debug(f'Release lock[{self.name}] by me[{self.id}] on transaction commit, wait transaction...')
+            logger.debug(f'I[{self.id}] release lock[{self.name}] on transaction commit ...')
             transaction.on_commit(_release)
         else:
             _release()
-
