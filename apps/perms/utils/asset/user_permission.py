@@ -115,8 +115,8 @@ class UnionQuerySet(QuerySet):
     def __getitem__(self, item):
         return self.__execute()[item]
 
-    def __next__(self):
-        return next(self.__execute())
+    def __iter__(self):
+        return iter(self.__execute())
 
     @classmethod
     def test_it(cls):
@@ -618,13 +618,13 @@ class UserGrantedTreeBuildUtils(UserGrantedUtilsBase):
 
 class UserGrantedAssetsQueryUtils(UserGrantedUtilsBase):
 
-    def get_favorite_assets(self, only=('id', )) -> QuerySet:
+    def get_favorite_assets(self) -> QuerySet:
         favorite_asset_ids = FavoriteAsset.objects.filter(
             user=self.user
         ).values_list('asset_id', flat=True)
         favorite_asset_ids = list(favorite_asset_ids)
         assets = self.get_all_granted_assets()
-        assets = assets.filter(id__in=favorite_asset_ids).only(*only)
+        assets = assets.filter(id__in=favorite_asset_ids)
         return assets
 
     def get_ungroup_assets(self) -> AssetQuerySet:
@@ -678,7 +678,7 @@ class UserGrantedAssetsQueryUtils(UserGrantedUtilsBase):
             return Asset.objects.none()
 
     def _get_indirect_granted_node_assets(self, id) -> AssetQuerySet:
-        assets = Asset.objects.order_by().filter(nodes__id=id) & self.get_direct_granted_assets()
+        assets = Asset.objects.order_by().filter(nodes__id=id).distinct() & self.get_direct_granted_assets()
         return assets
 
     def _get_indirect_granted_node_all_assets(self, node) -> QuerySet:
