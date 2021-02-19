@@ -5,6 +5,7 @@ from common.utils import get_logger, dict_get_any, is_uuid, get_object_or_none, 
 from common.http import is_true
 from common.struct import Stack
 from common.db.models import output_as_string
+from orgs.utils import ensure_in_real_or_default_org, current_org
 
 from .locks import NodeTreeUpdateLock
 from .models import Node, Asset
@@ -13,7 +14,9 @@ logger = get_logger(__file__)
 
 
 @NodeTreeUpdateLock()
+@ensure_in_real_or_default_org
 def check_node_assets_amount():
+    logger.info(f'Check node assets amount {current_org}')
     nodes = list(Node.objects.all().only('id', 'key', 'assets_amount'))
     nodeid_assetid_pairs = list(Asset.nodes.through.objects.all().values_list('node_id', 'asset_id'))
 

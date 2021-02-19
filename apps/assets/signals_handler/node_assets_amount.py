@@ -32,7 +32,6 @@ def on_node_asset_change(sender, action, instance, reverse, pk_set, **kwargs):
     if action not in mapper:
         return
 
-    ensure_in_real_or_default_org()
     operator = mapper[action]
 
     if reverse:
@@ -64,6 +63,7 @@ class NodeAssetsAmountUtils:
         return exists
 
     @classmethod
+    @ensure_in_real_or_default_org
     @NodeTreeUpdateLock()
     def update_nodes_asset_amount(cls, node_keys, asset_pk, operator):
         """
@@ -113,6 +113,7 @@ class NodeAssetsAmountUtils:
         )
 
     @classmethod
+    @ensure_in_real_or_default_org
     @NodeTreeUpdateLock()
     def update_node_assets_amount(cls, node: Node, asset_pk_set: set, operator=add):
         """

@@ -299,12 +299,12 @@ class UserGrantedTreeRefreshController:
         cls.remove_builed_orgs_from_users(orgs_id, users_id)
 
     @classmethod
+    @ensure_in_real_or_default_org
     def add_need_refresh_on_nodes_assets_relate_change(cls, node_ids, asset_ids):
         """
         1，计算与这些资产有关的授权
         2，计算与这些节点以及祖先节点有关的授权
         """
-        ensure_in_real_or_default_org()
 
         node_ids = set(node_ids)
         ancestor_node_keys = set()
@@ -340,8 +340,8 @@ class UserGrantedTreeRefreshController:
                 cls.add_need_refresh_by_asset_perm_ids(perm_ids)
 
     @classmethod
+    @ensure_in_real_or_default_org
     def add_need_refresh_by_asset_perm_ids(cls, asset_perm_ids):
-        ensure_in_real_or_default_org()
 
         group_ids = AssetPermission.user_groups.through.objects.filter(
             assetpermission_id__in=asset_perm_ids
@@ -429,8 +429,8 @@ class UserGrantedTreeBuildUtils(UserGrantedUtilsBase):
         return asset_ids
 
     @timeit
+    @ensure_in_real_or_default_org
     def rebuild_user_granted_tree(self):
-        ensure_in_real_or_default_org()
         logger.info(f'Rebuild user:{self.user} tree in org:{current_org}')
 
         user = self.user
